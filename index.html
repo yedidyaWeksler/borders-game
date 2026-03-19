@@ -24,9 +24,9 @@
         .lang-btn.active { border-color: #3b82f6; background-color: #eff6ff; }
         .lang-btn img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
-        .country-select-wrapper { position: absolute; top: 20px; right: 20px; z-index: 1001; }
-        #country-selector { padding: 8px 15px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 8px; background: white; outline: none; cursor: pointer; font-family: inherit; color: #1e293b; max-width: 200px; }
-        #country-selector:focus { border-color: #3b82f6; }
+        .selectors-container { position: absolute; top: 20px; right: 20px; z-index: 1001; display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+        select { padding: 8px 15px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 8px; background: white; outline: none; cursor: pointer; font-family: inherit; color: #1e293b; max-width: 200px; width: 100%; transition: 0.2s; }
+        select:focus { border-color: #3b82f6; }
         
         h1 { margin: 5px 0 10px 0; color: #1e293b; font-size: 26px; }
         .mode-selector { margin-bottom: 12px; font-weight: bold; color: #334155; }
@@ -83,8 +83,12 @@
             <button class="lang-btn" id="btn-en" onclick="setLang('en')" title="English"><img src="https://flagcdn.com/w40/us.png" alt="United States"></button>
         </div>
 
-        <div class="country-select-wrapper">
-            <select id="country-selector" title="בחר מדינה"><option value="">טוען מדינות...</option></select>
+        <div class="selectors-container">
+            <select id="game-type-selector" title="בחר מצב משחק">
+                <option value="world">🌍 מדינות העולם</option>
+                <option value="us">🇺🇸 ארצות הברית</option>
+            </select>
+            <select id="country-selector" title="בחר מדינה"><option value="">טוען נתונים...</option></select>
         </div>
 
         <h1 id="game-title">טוען את המפה... 🌍</h1>
@@ -97,12 +101,12 @@
         
         <div class="input-group">
             <div class="autocomplete-wrapper">
-                <input type="text" id="countryInput" placeholder="הקלד שם מדינה..." autocomplete="off" disabled>
+                <input type="text" id="countryInput" placeholder="הקלד שם..." autocomplete="off" disabled>
                 <div id="autocomplete-list" class="autocomplete-items"></div>
             </div>
             <button id="submitBtn" class="btn btn-primary" disabled>אישור</button>
             <button id="hintBtn" class="btn btn-hint" disabled>💡 רמז</button>
-            <button id="newGameBtn" class="btn btn-new" disabled>🔄 מדינה אקראית</button>
+            <button id="newGameBtn" class="btn btn-new" disabled>🔄 משחק אקראי</button>
         </div>
         
         <div class="status-container">
@@ -157,15 +161,25 @@
         }
 
         const i18n = {
-            he: { loading: "טוען את המפה... 🌍", errorLoad: "שגיאה בטעינת הנתונים.", titlePrefix: "השכנות של ", placeholder: "הקלד שם מדינה...", btnSubmit: "אישור", btnHint: "💡 רמז", btnNew: "🔄 מדינה אקראית", labelEasy: "מצב קל", labelHard: "מצב קשה", textFound: "נמצאו: ", success: "בול! במקום!", wrongGuess: "טעות, נסה שוב", win: "סיימת את המדינה! 🎉", modalTitle: "ניצחון! 🎉", textAccuracy: "אחוז הצלחה: ", textHints: "רמזים שנוצלו: ", btnPlayAgain: "משחק נוסף", hintPrefix: "רמז: " },
-            en: { loading: "Loading map... 🌍", errorLoad: "Error loading data.", titlePrefix: "Neighbors of ", placeholder: "Type country name...", btnSubmit: "Submit", btnHint: "💡 Hint", btnNew: "🔄 Random Country", labelEasy: "Easy Mode", labelHard: "Hard Mode", textFound: "Found: ", success: "Spot on!", wrongGuess: "Wrong, try again", win: "Completed! 🎉", modalTitle: "Victory! 🎉", textAccuracy: "Accuracy: ", textHints: "Hints used: ", btnPlayAgain: "Play Again", hintPrefix: "Hint: " },
-            ar: { loading: "جاري تحميل الخريطة... 🌍", errorLoad: "خطأ في التحميل.", titlePrefix: "جيران ", placeholder: "اكتب اسم الدولة...", btnSubmit: "تأكيد", btnHint: "💡 تلميح", btnNew: "🔄 عشوائية", labelEasy: "وضع سهل", labelHard: "وضع صعب", textFound: "تم العثور: ", success: "ممتاز!", wrongGuess: "خطأ، حاول مرة أخرى", win: "اكتملت! 🎉", modalTitle: "انتصار! 🎉", textAccuracy: "نسبة النجاح: ", textHints: "التلميحات: ", btnPlayAgain: "العب مرة أخرى", hintPrefix: "تلميح: " }
+            he: { loading: "טוען את המפה...", errorLoad: "שגיאה בטעינת הנתונים.", titlePrefix: "השכנות של ", placeholder: "הקלד שם...", btnSubmit: "אישור", btnHint: "💡 רמז", btnNew: "🔄 אקראי", labelEasy: "מצב קל", labelHard: "מצב קשה", textFound: "נמצאו: ", success: "בול! במקום!", wrongGuess: "טעות, נסה שוב", win: "סיימת בהצלחה! 🎉", modalTitle: "ניצחון! 🎉", textAccuracy: "אחוז הצלחה: ", textHints: "רמזים שנוצלו: ", btnPlayAgain: "משחק נוסף", hintPrefix: "רמז: ", worldGame: "🌍 מדינות העולם", usGame: "🇺🇸 ארצות הברית" },
+            en: { loading: "Loading map...", errorLoad: "Error loading data.", titlePrefix: "Neighbors of ", placeholder: "Type name...", btnSubmit: "Submit", btnHint: "💡 Hint", btnNew: "🔄 Random", labelEasy: "Easy Mode", labelHard: "Hard Mode", textFound: "Found: ", success: "Spot on!", wrongGuess: "Wrong, try again", win: "Completed! 🎉", modalTitle: "Victory! 🎉", textAccuracy: "Accuracy: ", textHints: "Hints used: ", btnPlayAgain: "Play Again", hintPrefix: "Hint: ", worldGame: "🌍 World Countries", usGame: "🇺🇸 US States" },
+            ar: { loading: "جاري تحميل الخريطة...", errorLoad: "خطأ في التحميل.", titlePrefix: "جيران ", placeholder: "اكتب اسم...", btnSubmit: "تأكيد", btnHint: "💡 تلميح", btnNew: "🔄 عشوائي", labelEasy: "وضع سهل", labelHard: "وضع صعب", textFound: "تم العثور: ", success: "ممتاز!", wrongGuess: "خطأ، حاول مرة أخرى", win: "اكتملت! 🎉", modalTitle: "انتصار! 🎉", textAccuracy: "نسبة النجاح: ", textHints: "التلميحات: ", btnPlayAgain: "العب مرة أخرى", hintPrefix: "تلميح: ", worldGame: "🌍 دول العالم", usGame: "🇺🇸 الولايات المتحدة" }
         };
 
         let currentLang = 'he'; 
         const map = L.map('map', { zoomControl: true, attributionControl: false }).setView([31.5, 34.8], 3);
-        let worldGeoData = null; let geoJsonLayer = null; let currentMode = 'hard';
-        let globalCountriesDict = {}; let playableCountriesCodes = []; 
+        
+        // --- Data Management ---
+        let currentGameType = 'world'; 
+        
+        let worldGeo = null; let usGeo = null;
+        let worldDict = {}; let worldCodes = [];
+        let usDict = {}; let usCodes = [];
+        
+        let currentGeoData = null; let activeDict = {}; let activeCodes = [];
+        
+        let currentMode = 'hard';
+        let geoJsonLayer = null; 
         let currentTargetCode = null; let currentNeighbors = {}; 
         let foundCount = 0; let totalNeighbors = 0;
         let wrongGuesses = 0; let hintsUsed = 0; let currentHintCode = null; let revealedIndices = []; let currentFocus = -1;
@@ -178,104 +192,111 @@
             foundCount: document.getElementById('found-count'), totalCount: document.getElementById('total-count'), 
             labelEasy: document.getElementById('label-easy'), labelHard: document.getElementById('label-hard'), 
             textFound: document.getElementById('text-found'), progressBar: document.getElementById('progress-bar'),
-            countrySelector: document.getElementById('country-selector'), modal: document.getElementById('endGameModal')
+            countrySelector: document.getElementById('country-selector'), gameTypeSelector: document.getElementById('game-type-selector'),
+            modal: document.getElementById('endGameModal')
         };
 
-        // מילון מיזוג טריטוריות ומדינות במחלוקת למדינה האם
-        const territoryMergeMap = {
-            'PSE': 'ISR', // הרשות הפלסטינית וישראל
-            'ESH': 'MAR', // סהרה המערבית למרוקו
-            'XKX': 'SRB', // קוסובו לסרביה
-            'KOS': 'SRB', // קוד חלופי לקוסובו
-            'UNK': 'SRB', // קוד נוסף שמסד הנתונים נותן לקוסובו לפעמים
-            'SOL': 'SOM', // סומלילנד לסומליה
-            'CYN': 'CYP'  // צפון קפריסין לקפריסין
-        };
-
-        // רשימת אזורים ואיים שלא רוצים שיופיעו במשחק או כגבולות
+        // --- World Geopolitics ---
+        const territoryMergeMap = { 'PSE': 'ISR', 'ESH': 'MAR', 'XKX': 'SRB', 'KOS': 'SRB', 'UNK': 'SRB', 'SOL': 'SOM', 'CYN': 'CYP' };
         const excludedCodes = ['GIB', 'MAF', 'SXM', 'HKG', 'MAC', 'GUF', 'CUW', 'BVT'];
 
         const customNamesOverridesHeb = {
             "AFG": "אפגניסטן", "AGO": "אנגולה", "ALB": "אלבניה", "AND": "אנדורה", "ARE": "איחוד האמירויות", "ARG": "ארגנטינה", "ARM": "ארמניה", "ATG": "אנטיגואה וברבודה", "AUS": "אוסטרליה", "AUT": "אוסטריה", "AZE": "אזרבייג'ן", "BDI": "בורונדי", "BEL": "בלגיה", "BEN": "בנין", "BFA": "בורקינה פאסו", "BGD": "בנגלדש", "BGR": "בולגריה", "BHR": "בחריין", "BHS": "איי בהאמה", "BIH": "בוסניה והרצגובינה", "BLR": "בלארוס", "BLZ": "בליז", "BOL": "בוליביה", "BRA": "ברזיל", "BRB": "ברבדוס", "BRN": "ברוניי", "BTN": "בהוטן", "BWA": "בוטסואנה", "CAF": "הרפובליקה המרכז אפריקאית", "CAN": "קנדה", "CHE": "שוויץ", "CHL": "צ'ילה", "CHN": "סין", "CIV": "חוף השנהב", "CMR": "קמרון", "COD": "הרפובליקה הדמוקרטית של קונגו", "COG": "קונגו", "COL": "קולומביה", "COM": "קומורו", "CPV": "כף ורדה", "CRI": "קוסטה ריקה", "CUB": "קובה", "CYP": "קפריסין", "CZE": "צ'כיה", "DEU": "גרמניה", "DJI": "ג'יבוטי", "DMA": "דומיניקה", "DNK": "דנמרק", "DOM": "הרפובליקה הדומיניקנית", "DZA": "אלג'יריה", "ECU": "אקוודור", "EGY": "מצרים", "ERI": "אריתריאה", "ESP": "ספרד", "EST": "אסטוניה", "ETH": "אתיופיה", "FIN": "פינלנד", "FJI": "פיג'י", "FRA": "צרפת", "FSM": "מיקרונזיה", "GAB": "גבון", "GBR": "בריטניה", "GEO": "גיאורגיה", "GHA": "גאנה", "GIN": "גינאה", "GMB": "גמביה", "GNB": "גינאה ביסאו", "GNQ": "גינאה המשוונית", "GRC": "יוון", "GRD": "גרנדה", "GTM": "גואטמלה", "GUY": "גיאנה", "HND": "הונדורס", "HRV": "קרואטיה", "HTI": "האיטי", "HUN": "הונגריה", "IDN": "אינדונזיה", "IND": "הודו", "IRL": "אירלנד", "IRN": "איראן", "IRQ": "עיראק", "ISL": "איסלנד", "ISR": "ישראל", "ITA": "איטליה", "JAM": "ג'מייקה", "JOR": "ירדן", "JPN": "יפן", "KAZ": "קזחסטן", "KEN": "קניה", "KGZ": "קירגיזסטן", "KHM": "קמבודיה", "KIR": "קיריבטי", "KNA": "סנט קיטס ונוויס", "KOR": "דרום קוריאה", "KWT": "כוויית", "LAO": "לאוס", "LBN": "לבנון", "LBR": "ליבריה", "LBY": "לוב", "LCA": "סנט לוסיה", "LIE": "ליכטנשטיין", "LKA": "סרי לנקה", "LSO": "לסוטו", "LTU": "ליטא", "LUX": "לוקסמבורג", "LVA": "לטביה", "MAR": "מרוקו", "MCO": "מונקו", "MDA": "מולדובה", "MDG": "מדגסקר", "MDV": "האיים המלדיביים", "MEX": "מקסיקו", "MHL": "איי מרשל", "MKD": "מקדוניה הצפונית", "MLI": "מאלי", "MLT": "מלטה", "MMR": "מיאנמר", "MNE": "מונטנגרו", "MNG": "מונגוליה", "MOZ": "מוזמביק", "MRT": "מאוריטניה", "MUS": "מאוריציוס", "MWI": "מלאווי", "MYS": "מלזיה", "NAM": "נמיביה", "NER": "ניג'ר", "NGA": "ניגריה", "NIC": "ניקרגואה", "NLD": "הולנד", "NOR": "נורווגיה", "NPL": "נפאל", "NRU": "נאורו", "NZL": "ניו זילנד", "OMN": "עומאן", "PAK": "פקיסטן", "PAN": "פנמה", "PER": "פרו", "PHL": "הפיליפינים", "PLW": "פלאו", "PNG": "פפואה גינאה החדשה", "POL": "פולין", "PRK": "צפון קוריאה", "PRT": "פורטוגל", "PRY": "פרגוואי", "QAT": "קטאר", "ROU": "רומניה", "RUS": "רוסיה", "RWA": "רואנדה", "SAU": "ערב הסעודית", "SDN": "סודאן", "SEN": "סנגל", "SGP": "סינגפור", "SLB": "איי שלמה", "SLE": "סיירה לאון", "SLV": "אל סלוודור", "SMR": "סן מרינו", "SOM": "סומליה", "SRB": "סרביה", "SSD": "דרום סודאן", "STP": "סאו טומה ופרינסיפה", "SUR": "סורינאם", "SVK": "סלובקיה", "SVN": "סלובניה", "SWE": "שוודיה", "SWZ": "אסוואטיני", "SYC": "סיישל", "SYR": "סוריה", "TCD": "צ'אד", "TGO": "טוגו", "THA": "תאילנד", "TJK": "טג'יקיסטן", "TKM": "טורקמניסטן", "TLS": "מזרח טימור", "TON": "טונגה", "TTO": "טרינידד וטובגו", "TUN": "תוניסיה", "TUR": "טורקיה", "TUV": "טובאלו", "TWN": "טאיוואן", "TZA": "טנזניה", "UGA": "אוגנדה", "UKR": "אוקראינה", "URY": "אורוגוואי", "USA": "ארצות הברית", "UZB": "אוזבקיסטן", "VAT": "קריית הוותיקן", "VCT": "סנט וינסנט והגרנדינים", "VEN": "ונצואלה", "VNM": "וייטנאם", "VUT": "ונואטו", "WSM": "סמואה", "YEM": "תימן", "ZAF": "דרום אפריקה", "ZMB": "זמביה", "ZWE": "זימבבואה"
         };
 
+        // --- US States Data ---
+        const usStatesData = {
+            "AL": { en: "Alabama", he: "אלבמה", ar: "ألاباما", borders: ["FL", "GA", "MS", "TN"] }, "AK": { en: "Alaska", he: "אלסקה", ar: "ألاسكا", borders: [] }, "AZ": { en: "Arizona", he: "אריזונה", ar: "أريزونا", borders: ["CA", "CO", "NM", "NV", "UT"] }, "AR": { en: "Arkansas", he: "ארקנסו", ar: "أركنساس", borders: ["LA", "MO", "MS", "OK", "TN", "TX"] }, "CA": { en: "California", he: "קליפורניה", ar: "كاليفورنيا", borders: ["AZ", "NV", "OR"] }, "CO": { en: "Colorado", he: "קולורדו", ar: "كولورادو", borders: ["AZ", "KS", "NE", "NM", "OK", "UT", "WY"] }, "CT": { en: "Connecticut", he: "קונטיקט", ar: "كونيتيكت", borders: ["MA", "NY", "RI"] }, "DE": { en: "Delaware", he: "דלאוור", ar: "ديلاوير", borders: ["MD", "NJ", "PA"] }, "FL": { en: "Florida", he: "פלורידה", ar: "فلوريدا", borders: ["AL", "GA"] }, "GA": { en: "Georgia", he: "ג'ורג'יה", ar: "جورجيا", borders: ["AL", "FL", "NC", "SC", "TN"] }, "HI": { en: "Hawaii", he: "הוואי", ar: "هاواي", borders: [] }, "ID": { en: "Idaho", he: "איידהו", ar: "أيداهو", borders: ["MT", "NV", "OR", "UT", "WA", "WY"] }, "IL": { en: "Illinois", he: "אילינוי", ar: "إلينوي", borders: ["IN", "IA", "KY", "MO", "WI"] }, "IN": { en: "Indiana", he: "אינדיאנה", ar: "إنديانا", borders: ["IL", "KY", "MI", "OH"] }, "IA": { en: "Iowa", he: "איווה", ar: "آيوا", borders: ["IL", "MN", "MO", "NE", "SD", "WI"] }, "KS": { en: "Kansas", he: "קנזס", ar: "كانساس", borders: ["CO", "MO", "NE", "OK"] }, "KY": { en: "Kentucky", he: "קנטקי", ar: "كنتاكي", borders: ["IL", "IN", "MO", "OH", "TN", "VA", "WV"] }, "LA": { en: "Louisiana", he: "לואיזיאנה", ar: "لويزيانا", borders: ["AR", "MS", "TX"] }, "ME": { en: "Maine", he: "מיין", ar: "مين", borders: ["NH"] }, "MD": { en: "Maryland", he: "מרילנד", ar: "ماريلاند", borders: ["DE", "PA", "VA", "WV"] }, "MA": { en: "Massachusetts", he: "מסצ'וסטס", ar: "ماساتشوستس", borders: ["CT", "NH", "NY", "RI", "VT"] }, "MI": { en: "Michigan", he: "מישיגן", ar: "ميشيغان", borders: ["IN", "OH", "WI"] }, "MN": { en: "Minnesota", he: "מינסוטה", ar: "مينيسوتا", borders: ["IA", "ND", "SD", "WI"] }, "MS": { en: "Mississippi", he: "מיסיסיפי", ar: "مسيسيبي", borders: ["AL", "AR", "LA", "TN"] }, "MO": { en: "Missouri", he: "מיזורי", ar: "ميزوري", borders: ["AR", "IL", "IA", "KS", "KY", "NE", "OK", "TN"] }, "MT": { en: "Montana", he: "מונטנה", ar: "مونتانا", borders: ["ID", "ND", "SD", "WY"] }, "NE": { en: "Nebraska", he: "נברסקה", ar: "نبراسكا", borders: ["CO", "IA", "KS", "MO", "SD", "WY"] }, "NV": { en: "Nevada", he: "נבדה", ar: "نيفادا", borders: ["AZ", "CA", "ID", "OR", "UT"] }, "NH": { en: "New Hampshire", he: "ניו המפשייר", ar: "نيوهامبشير", borders: ["ME", "MA", "VT"] }, "NJ": { en: "New Jersey", he: "ניו ג'רזי", ar: "نيوجيرسي", borders: ["DE", "NY", "PA"] }, "NM": { en: "New Mexico", he: "ניו מקסיקו", ar: "نيومكسيكو", borders: ["AZ", "CO", "OK", "TX", "UT"] }, "NY": { en: "New York", he: "ניו יורק", ar: "نيويورك", borders: ["CT", "MA", "NJ", "PA", "VT"] }, "NC": { en: "North Carolina", he: "צפון קרוליינה", ar: "كارولاينا الشمالية", borders: ["GA", "SC", "TN", "VA"] }, "ND": { en: "North Dakota", he: "צפון דקוטה", ar: "داكوتا الشمالية", borders: ["MN", "MT", "SD"] }, "OH": { en: "Ohio", he: "אוהיו", ar: "أوهايو", borders: ["IN", "KY", "MI", "PA", "WV"] }, "OK": { en: "Oklahoma", he: "אוקלהומה", ar: "أوكلاهوما", borders: ["AR", "CO", "KS", "MO", "NM", "TX"] }, "OR": { en: "Oregon", he: "אורגון", ar: "أوريغون", borders: ["CA", "ID", "NV", "WA"] }, "PA": { en: "Pennsylvania", he: "פנסילבניה", ar: "بنسيلفانيا", borders: ["DE", "MD", "NJ", "NY", "OH", "WV"] }, "RI": { en: "Rhode Island", he: "רוד איילנד", ar: "رود آيلاند", borders: ["CT", "MA"] }, "SC": { en: "South Carolina", he: "דרום קרוליינה", ar: "كارولاينا الجنوبية", borders: ["GA", "NC"] }, "SD": { en: "South Dakota", he: "דרום דקוטה", ar: "داكوتا الجنوبية", borders: ["IA", "MN", "MT", "NE", "ND", "WY"] }, "TN": { en: "Tennessee", he: "טנסי", ar: "تينيسي", borders: ["AL", "AR", "GA", "KY", "MS", "MO", "NC", "VA"] }, "TX": { en: "Texas", he: "טקסס", ar: "تكساس", borders: ["AR", "LA", "NM", "OK"] }, "UT": { en: "Utah", he: "יוטה", ar: "يوتا", borders: ["AZ", "CO", "ID", "NV", "NM", "WY"] }, "VT": { en: "Vermont", he: "ורמונט", ar: "فيرمونت", borders: ["MA", "NH", "NY"] }, "VA": { en: "Virginia", he: "וירג'יניה", ar: "فرجينيا", borders: ["KY", "MD", "NC", "TN", "WV"] }, "WA": { en: "Washington", he: "וושינגטון", ar: "واشنطن", borders: ["ID", "OR"] }, "WV": { en: "West Virginia", he: "מערב וירג'יניה", ar: "فيرجينيا الغربية", borders: ["KY", "MD", "OH", "PA", "VA"] }, "WI": { en: "Wisconsin", he: "ויסקונסין", ar: "ويسكونسن", borders: ["IL", "IA", "MI", "MN"] }, "WY": { en: "Wyoming", he: "ויומינג", ar: "وايومنغ", borders: ["CO", "ID", "MT", "NE", "SD", "UT"] }
+        };
+
         document.addEventListener("DOMContentLoaded", async function() {
             try {
-                const [apiResponse, geoResponse] = await Promise.all([
+                const [apiResponse, geoResponse, usGeoResponse] = await Promise.all([
                     fetch('https://restcountries.com/v3.1/all?fields=cca3,translations,borders,name'),
-                    fetch('https://cdn.jsdelivr.net/gh/datasets/geo-countries@master/data/countries.geojson')
+                    fetch('https://cdn.jsdelivr.net/gh/datasets/geo-countries@master/data/countries.geojson'),
+                    fetch('https://cdn.jsdelivr.net/gh/PublicaMundi/MappingAPI@master/data/geojson/us-states.json')
                 ]);
 
-                if (!apiResponse.ok || !geoResponse.ok) throw new Error("Network Error");
+                if (!apiResponse.ok || !geoResponse.ok || !usGeoResponse.ok) throw new Error("Network Error");
                 const apiData = await apiResponse.json();
-                worldGeoData = await geoResponse.json();
+                worldGeo = await geoResponse.json();
+                usGeo = await usGeoResponse.json();
 
-                // 1. טיפול יסודי וגיאופוליטי בפוליגונים במפה כדי למנוע חורים וקודים שגויים
-                worldGeoData.features.forEach(feature => {
-                    let fCode = feature.properties.ISO_A3 || feature.properties.iso_a3 || feature.id;
+                // --- בניית מפת עולם וזיהוי שמות למקרה של חוסר חפיפה בקוד ---
+                worldGeo.features.forEach(feature => {
+                    let fCode = feature.properties.ISO_A3 || feature.properties.iso_a3 || feature.properties.ADM0_A3 || feature.id;
                     let fName = (feature.properties.ADMIN || feature.properties.name || "").toLowerCase();
                     
-                    // ישראל ופלסטין
                     if (fCode === 'PSE' || fCode === 'WBG' || fCode === 'GAZ' || fName.includes('palestine') || fName.includes('west bank') || fName.includes('gaza')) {
-                        feature.properties.ISO_A3 = 'ISR'; feature.id = 'ISR';
+                        feature.properties.fixedCode = 'ISR'; feature.id = 'ISR';
+                    } else if (fCode === 'ESH' || fName.includes('western sahara')) {
+                        feature.properties.fixedCode = 'MAR'; feature.id = 'MAR';
+                    } else if (fCode === 'XKX' || fCode === 'KOS' || fCode === 'UNK' || fName.includes('kosovo') || fName === 'serbia' || fName.includes('republic of serbia')) {
+                        feature.properties.fixedCode = 'SRB'; feature.id = 'SRB';
+                    } else if (fCode === 'SOL' || fName.includes('somaliland')) {
+                        feature.properties.fixedCode = 'SOM'; feature.id = 'SOM';
+                    } else if (fCode === 'CYN' || fName.includes('northern cyprus')) {
+                        feature.properties.fixedCode = 'CYP'; feature.id = 'CYP';
+                    } else if (fCode === 'USA' || fCode === 'US1' || fName.includes('united states') || fName.includes('united states of america')) {
+                        feature.properties.fixedCode = 'USA'; feature.id = 'USA';
+                    } else {
+                        feature.properties.fixedCode = fCode;
                     }
-                    // מרוקו וסהרה המערבית
-                    else if (fCode === 'ESH' || fName.includes('western sahara')) {
-                        feature.properties.ISO_A3 = 'MAR'; feature.id = 'MAR';
-                    }
-                    // סרביה וקוסובו
-                    else if (fCode === 'XKX' || fCode === 'KOS' || fCode === 'UNK' || fName.includes('kosovo') || fName === 'serbia' || fName.includes('republic of serbia')) {
-                        feature.properties.ISO_A3 = 'SRB'; feature.id = 'SRB';
-                    }
-                    // סומליה וסומלילנד
-                    else if (fCode === 'SOL' || fName.includes('somaliland')) {
-                        feature.properties.ISO_A3 = 'SOM'; feature.id = 'SOM';
-                    }
-                    // קפריסין וצפון קפריסין
-                    else if (fCode === 'CYN' || fName.includes('northern cyprus')) {
-                        feature.properties.ISO_A3 = 'CYP'; feature.id = 'CYP';
-                    }
-                    // התיקון לארצות הברית:
-                    else if (fCode === 'USA' || fCode === 'US1' || fName.includes('united states') || fName.includes('united states of america')) {
-                        feature.properties.ISO_A3 = 'USA'; feature.id = 'USA';
-                    }
+                    feature.properties.fixedName = fName; // אבטחה לזיהוי מדויק לפי שם אנגלי
                 });
 
-                // 2. בניית מסד הנתונים מהשרת תוך שימוש במילוני הדריסה
                 apiData.forEach(country => {
                     const code = country.cca3;
                     if (territoryMergeMap[code] || excludedCodes.includes(code)) return; 
-
+                    
                     const englishName = country.name.common;
                     let hebrewName = englishName; 
                     if (country.translations && country.translations.heb) hebrewName = country.translations.heb.common;
                     if (customNamesOverridesHeb[code]) hebrewName = customNamesOverridesHeb[code];
-
+                    
                     let arabicName = englishName;
                     if (country.translations && country.translations.ara) arabicName = country.translations.ara.common;
-
-                    // העברת גבולות לטריטוריות האם והסרת שטחים מיותרים
+                    
                     let borders = country.borders || []; 
                     borders = borders.map(b => territoryMergeMap[b] ? territoryMergeMap[b] : b);
                     borders = borders.filter(b => !excludedCodes.includes(b) && b !== code); 
                     borders = [...new Set(borders)]; 
-
-                    globalCountriesDict[code] = { name: { he: hebrewName, en: englishName, ar: arabicName }, borders: borders };
-                    if (borders.length > 0) playableCountriesCodes.push(code);
+                    
+                    worldDict[code] = { name: { he: hebrewName, en: englishName, ar: arabicName }, borders: borders };
+                    if (borders.length > 0) worldCodes.push(code);
                 });
 
-                // 3. השלמת גבולות אוטומטית (מוודא ששתי מדינות שכנות יכירו אחת בשנייה כגבול הדדי)
-                playableCountriesCodes.forEach(code => {
-                    globalCountriesDict[code].borders.forEach(neighborCode => {
-                        if (globalCountriesDict[neighborCode] && !globalCountriesDict[neighborCode].borders.includes(code)) {
-                            globalCountriesDict[neighborCode].borders.push(code);
+                worldCodes.forEach(code => {
+                    worldDict[code].borders.forEach(neighborCode => {
+                        if (worldDict[neighborCode] && !worldDict[neighborCode].borders.includes(code)) {
+                            worldDict[neighborCode].borders.push(code);
                         }
                     });
                 });
 
-                populateCountrySelector();
-                elements.newGameBtn.disabled = false;
-                startRandomGame();
+                // --- בניית מפת ארצות הברית ---
+                usGeo.features.forEach(f => {
+                    let props = f.properties;
+                    let fNameEn = (props.name || "").toLowerCase();
+                    let matchedCode = Object.keys(usStatesData).find(k => usStatesData[k].en.toLowerCase() === fNameEn);
+                    if (matchedCode) props.fixedCode = matchedCode;
+                    props.fixedName = fNameEn; 
+                });
+
+                for (const [code, data] of Object.entries(usStatesData)) {
+                    usDict[code] = { name: { he: data.he, en: data.en, ar: data.ar }, borders: data.borders };
+                    if (data.borders.length > 0) usCodes.push(code);
+                }
+
+                usCodes.forEach(code => {
+                    usDict[code].borders.forEach(neighborCode => {
+                        if (usDict[neighborCode] && !usDict[neighborCode].borders.includes(code)) {
+                            usDict[neighborCode].borders.push(code);
+                        }
+                    });
+                });
+
+                setGameType('world');
 
             } catch (error) {
                 elements.message.textContent = i18n[currentLang].errorLoad;
@@ -283,24 +304,44 @@
             }
         });
 
+        elements.gameTypeSelector.addEventListener('change', function() { setGameType(this.value); });
+
+        function setGameType(type) {
+            currentGameType = type;
+            if (type === 'world') {
+                activeDict = worldDict;
+                activeCodes = worldCodes;
+                currentGeoData = worldGeo;
+                map.setView([31.5, 34.8], 3);
+            } else {
+                activeDict = usDict;
+                activeCodes = usCodes;
+                currentGeoData = usGeo;
+                map.setView([39.8, -98.5], 4);
+            }
+            populateCountrySelector();
+            elements.newGameBtn.disabled = false;
+            startRandomGame();
+        }
+
         function populateCountrySelector() {
             elements.countrySelector.innerHTML = '';
-            const sortedCodes = playableCountriesCodes.slice().sort((a, b) => {
-                return globalCountriesDict[a].name[currentLang].localeCompare(globalCountriesDict[b].name[currentLang], currentLang);
+            const sortedCodes = activeCodes.slice().sort((a, b) => {
+                return activeDict[a].name[currentLang].localeCompare(activeDict[b].name[currentLang], currentLang);
             });
 
             sortedCodes.forEach(code => {
                 let opt = document.createElement('option');
                 opt.value = code;
-                opt.textContent = globalCountriesDict[code].name[currentLang];
+                opt.textContent = activeDict[code].name[currentLang];
                 elements.countrySelector.appendChild(opt);
             });
-            if (currentTargetCode) elements.countrySelector.value = currentTargetCode;
+            if (currentTargetCode && activeCodes.includes(currentTargetCode)) {
+                elements.countrySelector.value = currentTargetCode;
+            }
         }
 
-        elements.countrySelector.addEventListener('change', function() {
-            if (this.value) loadGameForCountry(this.value);
-        });
+        elements.countrySelector.addEventListener('change', function() { if (this.value) loadGameForCountry(this.value); });
 
         window.setLang = function(lang) {
             currentLang = lang;
@@ -319,27 +360,30 @@
             document.getElementById('modal-title').textContent = i18n[lang].modalTitle;
             document.getElementById('modalNewGameBtn').textContent = i18n[lang].btnPlayAgain;
             
+            elements.gameTypeSelector.options[0].text = i18n[lang].worldGame;
+            elements.gameTypeSelector.options[1].text = i18n[lang].usGame;
+
             populateCountrySelector();
-            if (currentTargetCode) elements.title.textContent = i18n[lang].titlePrefix + globalCountriesDict[currentTargetCode].name[lang];
+            if (currentTargetCode && activeDict[currentTargetCode]) elements.title.textContent = i18n[lang].titlePrefix + activeDict[currentTargetCode].name[lang];
         };
 
         function startRandomGame() {
             elements.modal.style.display = 'none';
-            const randomIndex = Math.floor(Math.random() * playableCountriesCodes.length);
-            loadGameForCountry(playableCountriesCodes[randomIndex]);
+            const randomIndex = Math.floor(Math.random() * activeCodes.length);
+            loadGameForCountry(activeCodes[randomIndex]);
         }
 
         function loadGameForCountry(targetCode) {
             elements.modal.style.display = 'none';
             currentTargetCode = targetCode;
-            const targetData = globalCountriesDict[targetCode];
+            const targetData = activeDict[targetCode];
             
             elements.countrySelector.value = targetCode;
 
             currentNeighbors = {};
             targetData.borders.forEach(neighborCode => {
-                if (globalCountriesDict[neighborCode]) {
-                    currentNeighbors[neighborCode] = { name: globalCountriesDict[neighborCode].name, found: false };
+                if (activeDict[neighborCode]) {
+                    currentNeighbors[neighborCode] = { name: activeDict[neighborCode].name, found: false };
                 }
             });
 
@@ -361,19 +405,20 @@
             setTimeout(() => {
                 map.invalidateSize(); 
                 let targetBounds = null;
-                const targetNameEn = globalCountriesDict[currentTargetCode].name.en;
+                const targetNameEn = activeDict[currentTargetCode].name.en.toLowerCase();
                 
                 if (geoJsonLayer) {
                     geoJsonLayer.eachLayer(function(layer) {
-                        const fCode = layer.feature.properties.ISO_A3 || layer.feature.properties.iso_a3 || layer.feature.id;
-                        const fNameEn = layer.feature.properties.ADMIN || layer.feature.properties.name;
-                        if (fCode === currentTargetCode || fNameEn === targetNameEn) {
+                        const fCode = layer.feature.properties.fixedCode;
+                        const fName = layer.feature.properties.fixedName;
+                        // בדיקת זיהוי כפולה (קוד או שם)
+                        if (fCode === currentTargetCode || fName === targetNameEn) {
                             if (!targetBounds) targetBounds = layer.getBounds();
                             else targetBounds.extend(layer.getBounds());
                         }
                     });
                     if (targetBounds && targetBounds.isValid()) {
-                        map.fitBounds(targetBounds, { padding: [30, 30], maxZoom: 5, animate: false });
+                        map.fitBounds(targetBounds, { padding: [30, 30], maxZoom: 6, animate: false });
                     }
                 }
                 elements.input.focus();
@@ -381,21 +426,26 @@
         }
 
         function renderMap() {
-            if (!worldGeoData || !currentTargetCode) return;
+            if (!currentGeoData || !currentTargetCode) return;
             elements.mapContainer.style.backgroundColor = currentMode === 'easy' ? '#e2e8f0' : '#ffffff';
             if (geoJsonLayer) map.removeLayer(geoJsonLayer);
             
-            geoJsonLayer = L.geoJSON(worldGeoData, {
+            geoJsonLayer = L.geoJSON(currentGeoData, {
                 style: function(feature) {
-                    const featureCode = feature.properties.ISO_A3 || feature.properties.iso_a3 || feature.id;
-                    const featureNameEn = feature.properties.ADMIN || feature.properties.name;
-                    const targetNameEn = globalCountriesDict[currentTargetCode].name.en;
+                    const featureCode = feature.properties.fixedCode;
+                    const featureName = feature.properties.fixedName;
+                    const targetNameEn = activeDict[currentTargetCode].name.en.toLowerCase();
 
-                    if (featureCode === currentTargetCode || featureNameEn === targetNameEn) return { fillColor: '#3b82f6', color: '#ffffff', weight: 2, fillOpacity: 0.9, opacity: 1 };
+                    // צביעת מדינת היעד
+                    if (featureCode === currentTargetCode || featureName === targetNameEn) {
+                        return { fillColor: '#3b82f6', color: '#ffffff', weight: 2, fillOpacity: 0.9, opacity: 1 };
+                    }
                     
+                    // צביעת שכנות שנמצאו
                     let isFoundNeighbor = false;
                     for (let code in currentNeighbors) {
-                        if (currentNeighbors[code].found && (featureCode === code || featureNameEn === currentNeighbors[code].name.en)) {
+                        const nNameEn = currentNeighbors[code].name.en.toLowerCase();
+                        if (currentNeighbors[code].found && (featureCode === code || featureName === nNameEn)) {
                             isFoundNeighbor = true; break;
                         }
                     }
@@ -413,7 +463,7 @@
             currentFocus = -1;
             if (!val) return;
 
-            const allNames = Object.values(globalCountriesDict).map(c => c.name[currentLang]);
+            const allNames = Object.values(activeDict).map(c => c.name[currentLang]);
             const uniqueNames = [...new Set(allNames)].sort();
 
             uniqueNames.forEach(name => {
@@ -440,13 +490,13 @@
                 currentFocus--; addActive(x);
             } else if (e.key === "Enter") {
                 e.preventDefault();
-                if (currentFocus > -1) { if (x) x[currentFocus].click(); } 
+                if (currentFocus > -1) { if (x && x.length > 0) x[currentFocus].click(); } 
                 else { checkInput(); }
             }
         });
 
         function addActive(x) {
-            if (!x) return false;
+            if (!x || x.length === 0) return false;
             removeActive(x);
             if (currentFocus >= x.length) currentFocus = 0;
             if (currentFocus < 0) currentFocus = (x.length - 1);
@@ -479,8 +529,9 @@
         function triggerFireworks() {
             const duration = 3 * 1000; const end = Date.now() + duration;
             (function frame() {
-                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#3b82f6', '#10b981', '#f59e0b'] });
-                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#3b82f6', '#10b981', '#f59e0b'] });
+                // הוספת zIndex: 3000 כדי שהקונפטי יקפוץ מעל מסך הסיכום!
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#3b82f6', '#10b981', '#f59e0b'], zIndex: 3000 });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#3b82f6', '#10b981', '#f59e0b'], zIndex: 3000 });
                 if (Date.now() < end) requestAnimationFrame(frame);
             }());
         }
