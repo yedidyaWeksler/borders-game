@@ -187,6 +187,7 @@
             'ESH': 'MAR', // סהרה המערבית למרוקו
             'XKX': 'SRB', // קוסובו לסרביה
             'KOS': 'SRB', // קוד חלופי לקוסובו
+            'UNK': 'SRB', // קוד נוסף שמסד הנתונים נותן לקוסובו לפעמים
             'SOL': 'SOM', // סומלילנד לסומליה
             'CYN': 'CYP'  // צפון קפריסין לקפריסין
         };
@@ -223,7 +224,7 @@
                         feature.properties.ISO_A3 = 'MAR'; feature.id = 'MAR';
                     }
                     // סרביה וקוסובו
-                    else if (fCode === 'XKX' || fCode === 'KOS' || fName.includes('kosovo') || fName === 'serbia' || fName.includes('republic of serbia')) {
+                    else if (fCode === 'XKX' || fCode === 'KOS' || fCode === 'UNK' || fName.includes('kosovo') || fName === 'serbia' || fName.includes('republic of serbia')) {
                         feature.properties.ISO_A3 = 'SRB'; feature.id = 'SRB';
                     }
                     // סומליה וסומלילנד
@@ -233,6 +234,10 @@
                     // קפריסין וצפון קפריסין
                     else if (fCode === 'CYN' || fName.includes('northern cyprus')) {
                         feature.properties.ISO_A3 = 'CYP'; feature.id = 'CYP';
+                    }
+                    // התיקון לארצות הברית:
+                    else if (fCode === 'USA' || fCode === 'US1' || fName.includes('united states') || fName.includes('united states of america')) {
+                        feature.properties.ISO_A3 = 'USA'; feature.id = 'USA';
                     }
                 });
 
