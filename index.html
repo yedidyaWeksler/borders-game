@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק שכנות גלובלי 🌍</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; overflow: hidden; background: #f1f5f9; transition: all 0.3s ease; }
+        
+        #control-panel { 
+            position: absolute; top: 0; left: 0; right: 0; height: 265px; 
+            background: white; padding: 15px 25px; text-align: center; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            box-sizing: border-box;
+        }
+
+        .lang-toggle { position: absolute; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 1001; }
+        .lang-btn { background: transparent; border: 3px solid transparent; border-radius: 50%; cursor: pointer; padding: 2px; transition: 0.2s; display: inline-flex; }
+        .lang-btn:hover { transform: scale(1.1); }
+        .lang-btn.active { border-color: #3b82f6; background-color: #eff6ff; }
+        .lang-btn img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        .country-select-wrapper { position: absolute; top: 20px; right: 20px; z-index: 1001; }
+        #country-selector { padding: 8px 15px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 8px; background: white; outline: none; cursor: pointer; font-family: inherit; color: #1e293b; max-width: 200px; }
+        #country-selector:focus { border-color: #3b82f6; }
+        
+        h1 { margin: 5px 0 10px 0; color: #1e293b; font-size: 26px; }
+        .mode-selector { margin-bottom: 12px; font-weight: bold; color: #334155; }
+        
+        .input-group { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+        
+        .autocomplete-wrapper { position: relative; display: inline-block; }
+        input[type="text"] { padding: 10px 15px; font-size: 18px; border: 2px solid #cbd5e1; border-radius: 8px; width: 250px; outline: none; transition: 0.2s; box-sizing: border-box; }
+        input[type="text"]:focus { border-color: #3b82f6; }
+        input[type="text"]:disabled { background-color: #e2e8f0; cursor: not-allowed; }
+        
+        .autocomplete-items { position: absolute; border: 1px solid #cbd5e1; border-top: none; z-index: 99; top: 100%; left: 0; right: 0; max-height: 180px; overflow-y: auto; background-color: white; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: right; }
+        body[dir="ltr"] .autocomplete-items { text-align: left; }
+        .autocomplete-items div { padding: 10px; cursor: pointer; border-bottom: 1px solid #e2e8f0; color: #334155; transition: background-color 0.1s; }
+        .autocomplete-items div:hover { background-color: #eff6ff; color: #1d4ed8; }
+        .autocomplete-items div strong { color: #3b82f6; }
+        .autocomplete-active { background-color: #eff6ff !important; color: #1d4ed8 !important; }
+
+        .btn { padding: 10px 20px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; font-weight: bold; color: white; height: 45px; }
+        .btn-primary { background-color: #3b82f6; }
+        .btn-primary:hover { background-color: #2563eb; }
+        .btn-hint { background-color: #f59e0b; }
+        .btn-hint:hover { background-color: #d97706; }
+        .btn-new { background-color: #8b5cf6; }
+        .btn-new:hover { background-color: #7c3aed; }
+        .btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
+
+        .status-container { font-size: 18px; color: #475569; margin-bottom: 5px; width: 100%; max-width: 400px; display: flex; justify-content: space-between; align-items: center; }
+        #found-count { font-weight: bold; color: #10b981; font-size: 20px; }
+        
+        .progress-wrapper { width: 100%; max-width: 400px; height: 12px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: 5px; }
+        .progress-bar { height: 100%; width: 0%; background-color: #10b981; transition: width 0.5s ease; }
+        
+        #message { height: 25px; font-weight: bold; font-size: 18px; color: #10b981; transition: color 0.3s; }
+        #map { position: absolute; top: 265px; bottom: 0; left: 0; right: 0; transition: background-color 0.4s ease; z-index: 1; }
+        .leaflet-container { background: transparent; }
+
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .modal-content { background-color: white; padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-width: 400px; width: 90%; animation: slideIn 0.4s ease; }
+        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-content h2 { color: #1e293b; margin-top: 0; font-size: 28px; }
+        .stats { font-size: 20px; margin: 25px 0; color: #475569; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .stats p { margin: 10px 0; }
+        .stats span { font-weight: bold; color: #3b82f6; font-size: 24px; }
+        #modalNewGameBtn { width: 100%; font-size: 18px; padding: 12px; }
+    </style>
+</head>
+<body>
+
+    <div id="control-panel">
+        <div class="lang-toggle">
+            <button class="lang-btn active" id="btn-he" onclick="setLang('he')" title="עברית"><img src="https://flagcdn.com/w40/il.png" alt="Israel"></button>
+            <button class="lang-btn" id="btn-ar" onclick="setLang('ar')" title="العربية"><img src="https://flagcdn.com/w40/sa.png" alt="Saudi Arabia"></button>
+            <button class="lang-btn" id="btn-en" onclick="setLang('en')" title="English"><img src="https://flagcdn.com/w40/us.png" alt="United States"></button>
+        </div>
+
+        <div class="country-select-wrapper">
+            <select id="country-selector" title="בחר מדינה"><option value="">טוען מדינות...</option></select>
+        </div>
+
+        <h1 id="game-title">טוען את המפה... 🌍</h1>
+        
+        <div class="mode-selector">
+            <label><input type="radio" name="mode" value="easy"> <span id="label-easy">מצב קל</span></label>
+            &nbsp;&nbsp;&nbsp;
+            <label><input type="radio" name="mode" value="hard" checked> <span id="label-hard">מצב קשה</span></label>
+        </div>
+        
+        <div class="input-group">
+            <div class="autocomplete-wrapper">
+                <input type="text" id="countryInput" placeholder="הקלד שם מדינה..." autocomplete="off" disabled>
+                <div id="autocomplete-list" class="autocomplete-items"></div>
+            </div>
+            <button id="submitBtn" class="btn btn-primary" disabled>אישור</button>
+            <button id="hintBtn" class="btn btn-hint" disabled>💡 רמז</button>
+            <button id="newGameBtn" class="btn btn-new" disabled>🔄 מדינה אקראית</button>
+        </div>
+        
+        <div class="status-container">
+            <span id="text-found">נמצאו:</span>
+            <span><span id="found-count">0</span> / <span id="total-count">0</span></span>
+        </div>
+        
+        <div class="progress-wrapper"><div class="progress-bar" id="progress-bar"></div></div>
+        <div id="message">מתחבר למסד הנתונים...</div>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="endGameModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">ניצחון! 🎉</h2>
+            <div class="stats">
+                <p id="text-accuracy">אחוז הצלחה: <span id="stat-accuracy">100</span>%</p>
+                <p id="text-hints">רמזים שנוצלו: <span id="stat-hints">0</span></p>
+            </div>
+            <button id="modalNewGameBtn" class="btn btn-new">משחק נוסף</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+
+            if (type === 'ding') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'win') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.1);
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.2);
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
+                osc.start(); osc.stop(audioCtx.currentTime + 1);
+            }
+        }
+
+        const i18n = {
+            he: { loading: "טוען את המפה... 🌍", errorLoad: "שגיאה בטעינת הנתונים.", titlePrefix: "השכנות של ", placeholder: "הקלד שם מדינה...", btnSubmit: "אישור", btnHint: "💡 רמז", btnNew: "🔄 מדינה אקראית", labelEasy: "מצב קל", labelHard: "מצב קשה", textFound: "נמצאו: ", success: "בול! במקום!", wrongGuess: "טעות, נסה שוב", win: "סיימת את המדינה! 🎉", modalTitle: "ניצחון! 🎉", textAccuracy: "אחוז הצלחה: ", textHints: "רמזים שנוצלו: ", btnPlayAgain: "משחק נוסף", hintPrefix: "רמז: " },
+            en: { loading: "Loading map... 🌍", errorLoad: "Error loading data.", titlePrefix: "Neighbors of ", placeholder: "Type country name...", btnSubmit: "Submit", btnHint: "💡 Hint", btnNew: "🔄 Random Country", labelEasy: "Easy Mode", labelHard: "Hard Mode", textFound: "Found: ", success: "Spot on!", wrongGuess: "Wrong, try again", win: "Completed! 🎉", modalTitle: "Victory! 🎉", textAccuracy: "Accuracy: ", textHints: "Hints used: ", btnPlayAgain: "Play Again", hintPrefix: "Hint: " },
+            ar: { loading: "جاري تحميل الخريطة... 🌍", errorLoad: "خطأ في التحميل.", titlePrefix: "جيران ", placeholder: "اكتب اسم الدولة...", btnSubmit: "تأكيد", btnHint: "💡 تلميح", btnNew: "🔄 عشوائية", labelEasy: "وضع سهل", labelHard: "وضع صعب", textFound: "تم العثور: ", success: "ممتاز!", wrongGuess: "خطأ، حاول مرة أخرى", win: "اكتملت! 🎉", modalTitle: "انتصار! 🎉", textAccuracy: "نسبة النجاح: ", textHints: "التلميحات: ", btnPlayAgain: "العب مرة أخرى", hintPrefix: "تلميح: " }
+        };
+
+        let currentLang = 'he'; 
+        const map = L.map('map', { zoomControl: true, attributionControl: false }).setView([31.5, 34.8], 3);
+        let worldGeoData = null; let geoJsonLayer = null; let currentMode = 'hard';
+        let globalCountriesDict = {}; let playableCountriesCodes = []; 
+        let currentTargetCode = null; let currentNeighbors = {}; 
+        let foundCount = 0; let totalNeighbors = 0;
+        let wrongGuesses = 0; let hintsUsed = 0; let currentHintCode = null; let revealedIndices = []; let currentFocus = -1;
+
+        const elements = {
+            title: document.getElementById('game-title'), input: document.getElementById('countryInput'), 
+            autocompleteList: document.getElementById('autocomplete-list'), submitBtn: document.getElementById('submitBtn'), 
+            hintBtn: document.getElementById('hintBtn'), newGameBtn: document.getElementById('newGameBtn'), 
+            mapContainer: document.getElementById('map'), message: document.getElementById('message'), 
+            foundCount: document.getElementById('found-count'), totalCount: document.getElementById('total-count'), 
+            labelEasy: document.getElementById('label-easy'), labelHard: document.getElementById('label-hard'), 
+            textFound: document.getElementById('text-found'), progressBar: document.getElementById('progress-bar'),
+            countrySelector: document.getElementById('country-selector'), modal: document.getElementById('endGameModal')
+        };
+
+        // מילון מיזוג טריטוריות ומדינות במחלוקת למדינה האם
+        const territoryMergeMap = {
+            'PSE': 'ISR', // הרשות הפלסטינית וישראל
+            'ESH': 'MAR', // סהרה המערבית למרוקו
+            'XKX': 'SRB', // קוסובו לסרביה
+            'KOS': 'SRB', // קוד חלופי לקוסובו
+            'SOL': 'SOM', // סומלילנד לסומליה
+            'CYN': 'CYP'  // צפון קפריסין לקפריסין
+        };
+
+        // רשימת אזורים ואיים שלא רוצים שיופיעו במשחק או כגבולות
+        const excludedCodes = ['GIB', 'MAF', 'SXM', 'HKG', 'MAC', 'GUF', 'CUW', 'BVT'];
+
+        const customNamesOverridesHeb = {
+            "AFG": "אפגניסטן", "AGO": "אנגולה", "ALB": "אלבניה", "AND": "אנדורה", "ARE": "איחוד האמירויות", "ARG": "ארגנטינה", "ARM": "ארמניה", "ATG": "אנטיגואה וברבודה", "AUS": "אוסטרליה", "AUT": "אוסטריה", "AZE": "אזרבייג'ן", "BDI": "בורונדי", "BEL": "בלגיה", "BEN": "בנין", "BFA": "בורקינה פאסו", "BGD": "בנגלדש", "BGR": "בולגריה", "BHR": "בחריין", "BHS": "איי בהאמה", "BIH": "בוסניה והרצגובינה", "BLR": "בלארוס", "BLZ": "בליז", "BOL": "בוליביה", "BRA": "ברזיל", "BRB": "ברבדוס", "BRN": "ברוניי", "BTN": "בהוטן", "BWA": "בוטסואנה", "CAF": "הרפובליקה המרכז אפריקאית", "CAN": "קנדה", "CHE": "שוויץ", "CHL": "צ'ילה", "CHN": "סין", "CIV": "חוף השנהב", "CMR": "קמרון", "COD": "הרפובליקה הדמוקרטית של קונגו", "COG": "קונגו", "COL": "קולומביה", "COM": "קומורו", "CPV": "כף ורדה", "CRI": "קוסטה ריקה", "CUB": "קובה", "CYP": "קפריסין", "CZE": "צ'כיה", "DEU": "גרמניה", "DJI": "ג'יבוטי", "DMA": "דומיניקה", "DNK": "דנמרק", "DOM": "הרפובליקה הדומיניקנית", "DZA": "אלג'יריה", "ECU": "אקוודור", "EGY": "מצרים", "ERI": "אריתריאה", "ESP": "ספרד", "EST": "אסטוניה", "ETH": "אתיופיה", "FIN": "פינלנד", "FJI": "פיג'י", "FRA": "צרפת", "FSM": "מיקרונזיה", "GAB": "גבון", "GBR": "בריטניה", "GEO": "גיאורגיה", "GHA": "גאנה", "GIN": "גינאה", "GMB": "גמביה", "GNB": "גינאה ביסאו", "GNQ": "גינאה המשוונית", "GRC": "יוון", "GRD": "גרנדה", "GTM": "גואטמלה", "GUY": "גיאנה", "HND": "הונדורס", "HRV": "קרואטיה", "HTI": "האיטי", "HUN": "הונגריה", "IDN": "אינדונזיה", "IND": "הודו", "IRL": "אירלנד", "IRN": "איראן", "IRQ": "עיראק", "ISL": "איסלנד", "ISR": "ישראל", "ITA": "איטליה", "JAM": "ג'מייקה", "JOR": "ירדן", "JPN": "יפן", "KAZ": "קזחסטן", "KEN": "קניה", "KGZ": "קירגיזסטן", "KHM": "קמבודיה", "KIR": "קיריבטי", "KNA": "סנט קיטס ונוויס", "KOR": "דרום קוריאה", "KWT": "כוויית", "LAO": "לאוס", "LBN": "לבנון", "LBR": "ליבריה", "LBY": "לוב", "LCA": "סנט לוסיה", "LIE": "ליכטנשטיין", "LKA": "סרי לנקה", "LSO": "לסוטו", "LTU": "ליטא", "LUX": "לוקסמבורג", "LVA": "לטביה", "MAR": "מרוקו", "MCO": "מונקו", "MDA": "מולדובה", "MDG": "מדגסקר", "MDV": "האיים המלדיביים", "MEX": "מקסיקו", "MHL": "איי מרשל", "MKD": "מקדוניה הצפונית", "MLI": "מאלי", "MLT": "מלטה", "MMR": "מיאנמר", "MNE": "מונטנגרו", "MNG": "מונגוליה", "MOZ": "מוזמביק", "MRT": "מאוריטניה", "MUS": "מאוריציוס", "MWI": "מלאווי", "MYS": "מלזיה", "NAM": "נמיביה", "NER": "ניג'ר", "NGA": "ניגריה", "NIC": "ניקרגואה", "NLD": "הולנד", "NOR": "נורווגיה", "NPL": "נפאל", "NRU": "נאורו", "NZL": "ניו זילנד", "OMN": "עומאן", "PAK": "פקיסטן", "PAN": "פנמה", "PER": "פרו", "PHL": "הפיליפינים", "PLW": "פלאו", "PNG": "פפואה גינאה החדשה", "POL": "פולין", "PRK": "צפון קוריאה", "PRT": "פורטוגל", "PRY": "פרגוואי", "QAT": "קטאר", "ROU": "רומניה", "RUS": "רוסיה", "RWA": "רואנדה", "SAU": "ערב הסעודית", "SDN": "סודאן", "SEN": "סנגל", "SGP": "סינגפור", "SLB": "איי שלמה", "SLE": "סיירה לאון", "SLV": "אל סלוודור", "SMR": "סן מרינו", "SOM": "סומליה", "SRB": "סרביה", "SSD": "דרום סודאן", "STP": "סאו טומה ופרינסיפה", "SUR": "סורינאם", "SVK": "סלובקיה", "SVN": "סלובניה", "SWE": "שוודיה", "SWZ": "אסוואטיני", "SYC": "סיישל", "SYR": "סוריה", "TCD": "צ'אד", "TGO": "טוגו", "THA": "תאילנד", "TJK": "טג'יקיסטן", "TKM": "טורקמניסטן", "TLS": "מזרח טימור", "TON": "טונגה", "TTO": "טרינידד וטובגו", "TUN": "תוניסיה", "TUR": "טורקיה", "TUV": "טובאלו", "TWN": "טאיוואן", "TZA": "טנזניה", "UGA": "אוגנדה", "UKR": "אוקראינה", "URY": "אורוגוואי", "USA": "ארצות הברית", "UZB": "אוזבקיסטן", "VAT": "קריית הוותיקן", "VCT": "סנט וינסנט והגרנדינים", "VEN": "ונצואלה", "VNM": "וייטנאם", "VUT": "ונואטו", "WSM": "סמואה", "YEM": "תימן", "ZAF": "דרום אפריקה", "ZMB": "זמביה", "ZWE": "זימבבואה"
+        };
+
+        document.addEventListener("DOMContentLoaded", async function() {
+            try {
+                const [apiResponse, geoResponse] = await Promise.all([
+                    fetch('https://restcountries.com/v3.1/all?fields=cca3,translations,borders,name'),
+                    fetch('https://cdn.jsdelivr.net/gh/datasets/geo-countries@master/data/countries.geojson')
+                ]);
+
+                if (!apiResponse.ok || !geoResponse.ok) throw new Error("Network Error");
+                const apiData = await apiResponse.json();
+                worldGeoData = await geoResponse.json();
+
+                // 1. טיפול יסודי וגיאופוליטי בפוליגונים במפה כדי למנוע חורים וקודים שגויים
+                worldGeoData.features.forEach(feature => {
+                    let fCode = feature.properties.ISO_A3 || feature.properties.iso_a3 || feature.id;
+                    let fName = (feature.properties.ADMIN || feature.properties.name || "").toLowerCase();
+                    
+                    // ישראל ופלסטין
+                    if (fCode === 'PSE' || fCode === 'WBG' || fCode === 'GAZ' || fName.includes('palestine') || fName.includes('west bank') || fName.includes('gaza')) {
+                        feature.properties.ISO_A3 = 'ISR'; feature.id = 'ISR';
+                    }
+                    // מרוקו וסהרה המערבית
+                    else if (fCode === 'ESH' || fName.includes('western sahara')) {
+                        feature.properties.ISO_A3 = 'MAR'; feature.id = 'MAR';
+                    }
+                    // סרביה וקוסובו
+                    else if (fCode === 'XKX' || fCode === 'KOS' || fName.includes('kosovo') || fName === 'serbia' || fName.includes('republic of serbia')) {
+                        feature.properties.ISO_A3 = 'SRB'; feature.id = 'SRB';
+                    }
+                    // סומליה וסומלילנד
+                    else if (fCode === 'SOL' || fName.includes('somaliland')) {
+                        feature.properties.ISO_A3 = 'SOM'; feature.id = 'SOM';
+                    }
+                    // קפריסין וצפון קפריסין
+                    else if (fCode === 'CYN' || fName.includes('northern cyprus')) {
+                        feature.properties.ISO_A3 = 'CYP'; feature.id = 'CYP';
+                    }
+                });
+
+                // 2. בניית מסד הנתונים מהשרת תוך שימוש במילוני הדריסה
+                apiData.forEach(country => {
+                    const code = country.cca3;
+                    if (territoryMergeMap[code] || excludedCodes.includes(code)) return; 
+
+                    const englishName = country.name.common;
+                    let hebrewName = englishName; 
+                    if (country.translations && country.translations.heb) hebrewName = country.translations.heb.common;
+                    if (customNamesOverridesHeb[code]) hebrewName = customNamesOverridesHeb[code];
+
+                    let arabicName = englishName;
+                    if (country.translations && country.translations.ara) arabicName = country.translations.ara.common;
+
+                    // העברת גבולות לטריטוריות האם והסרת שטחים מיותרים
+                    let borders = country.borders || []; 
+                    borders = borders.map(b => territoryMergeMap[b] ? territoryMergeMap[b] : b);
+                    borders = borders.filter(b => !excludedCodes.includes(b) && b !== code); 
+                    borders = [...new Set(borders)]; 
+
+                    globalCountriesDict[code] = { name: { he: hebrewName, en: englishName, ar: arabicName }, borders: borders };
+                    if (borders.length > 0) playableCountriesCodes.push(code);
+                });
+
+                // 3. השלמת גבולות אוטומטית (מוודא ששתי מדינות שכנות יכירו אחת בשנייה כגבול הדדי)
+                playableCountriesCodes.forEach(code => {
+                    globalCountriesDict[code].borders.forEach(neighborCode => {
+                        if (globalCountriesDict[neighborCode] && !globalCountriesDict[neighborCode].borders.includes(code)) {
+                            globalCountriesDict[neighborCode].borders.push(code);
+                        }
+                    });
+                });
+
+                populateCountrySelector();
+                elements.newGameBtn.disabled = false;
+                startRandomGame();
+
+            } catch (error) {
+                elements.message.textContent = i18n[currentLang].errorLoad;
+                elements.message.style.color = 'red';
+            }
+        });
+
+        function populateCountrySelector() {
+            elements.countrySelector.innerHTML = '';
+            const sortedCodes = playableCountriesCodes.slice().sort((a, b) => {
+                return globalCountriesDict[a].name[currentLang].localeCompare(globalCountriesDict[b].name[currentLang], currentLang);
+            });
+
+            sortedCodes.forEach(code => {
+                let opt = document.createElement('option');
+                opt.value = code;
+                opt.textContent = globalCountriesDict[code].name[currentLang];
+                elements.countrySelector.appendChild(opt);
+            });
+            if (currentTargetCode) elements.countrySelector.value = currentTargetCode;
+        }
+
+        elements.countrySelector.addEventListener('change', function() {
+            if (this.value) loadGameForCountry(this.value);
+        });
+
+        window.setLang = function(lang) {
+            currentLang = lang;
+            document.body.dir = (lang === 'he' || lang === 'ar') ? 'rtl' : 'ltr';
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${lang}`).classList.add('active');
+            
+            elements.input.placeholder = i18n[lang].placeholder;
+            elements.submitBtn.textContent = i18n[lang].btnSubmit;
+            elements.hintBtn.textContent = i18n[lang].btnHint;
+            elements.newGameBtn.textContent = i18n[lang].btnNew;
+            elements.labelEasy.textContent = i18n[lang].labelEasy;
+            elements.labelHard.textContent = i18n[lang].labelHard;
+            elements.textFound.textContent = i18n[lang].textFound;
+            document.getElementById('modal-title').textContent = i18n[lang].modalTitle;
+            document.getElementById('modalNewGameBtn').textContent = i18n[lang].btnPlayAgain;
+            
+            populateCountrySelector();
+            if (currentTargetCode) elements.title.textContent = i18n[lang].titlePrefix + globalCountriesDict[currentTargetCode].name[lang];
+        };
+
+        function startRandomGame() {
+            elements.modal.style.display = 'none';
+            const randomIndex = Math.floor(Math.random() * playableCountriesCodes.length);
+            loadGameForCountry(playableCountriesCodes[randomIndex]);
+        }
+
+        function loadGameForCountry(targetCode) {
+            elements.modal.style.display = 'none';
+            currentTargetCode = targetCode;
+            const targetData = globalCountriesDict[targetCode];
+            
+            elements.countrySelector.value = targetCode;
+
+            currentNeighbors = {};
+            targetData.borders.forEach(neighborCode => {
+                if (globalCountriesDict[neighborCode]) {
+                    currentNeighbors[neighborCode] = { name: globalCountriesDict[neighborCode].name, found: false };
+                }
+            });
+
+            totalNeighbors = Object.keys(currentNeighbors).length;
+            foundCount = 0; wrongGuesses = 0; hintsUsed = 0; currentHintCode = null; revealedIndices = []; currentFocus = -1;
+
+            elements.title.textContent = i18n[currentLang].titlePrefix + targetData.name[currentLang];
+            elements.totalCount.textContent = totalNeighbors;
+            elements.foundCount.textContent = foundCount;
+            elements.progressBar.style.width = "0%";
+            elements.message.textContent = '';
+            elements.input.value = '';
+            elements.autocompleteList.innerHTML = '';
+            
+            elements.input.disabled = false; elements.submitBtn.disabled = false; elements.hintBtn.disabled = false;
+            
+            renderMap();
+            
+            setTimeout(() => {
+                map.invalidateSize(); 
+                let targetBounds = null;
+                const targetNameEn = globalCountriesDict[currentTargetCode].name.en;
+                
+                if (geoJsonLayer) {
+                    geoJsonLayer.eachLayer(function(layer) {
+                        const fCode = layer.feature.properties.ISO_A3 || layer.feature.properties.iso_a3 || layer.feature.id;
+                        const fNameEn = layer.feature.properties.ADMIN || layer.feature.properties.name;
+                        if (fCode === currentTargetCode || fNameEn === targetNameEn) {
+                            if (!targetBounds) targetBounds = layer.getBounds();
+                            else targetBounds.extend(layer.getBounds());
+                        }
+                    });
+                    if (targetBounds && targetBounds.isValid()) {
+                        map.fitBounds(targetBounds, { padding: [30, 30], maxZoom: 5, animate: false });
+                    }
+                }
+                elements.input.focus();
+            }, 50);
+        }
+
+        function renderMap() {
+            if (!worldGeoData || !currentTargetCode) return;
+            elements.mapContainer.style.backgroundColor = currentMode === 'easy' ? '#e2e8f0' : '#ffffff';
+            if (geoJsonLayer) map.removeLayer(geoJsonLayer);
+            
+            geoJsonLayer = L.geoJSON(worldGeoData, {
+                style: function(feature) {
+                    const featureCode = feature.properties.ISO_A3 || feature.properties.iso_a3 || feature.id;
+                    const featureNameEn = feature.properties.ADMIN || feature.properties.name;
+                    const targetNameEn = globalCountriesDict[currentTargetCode].name.en;
+
+                    if (featureCode === currentTargetCode || featureNameEn === targetNameEn) return { fillColor: '#3b82f6', color: '#ffffff', weight: 2, fillOpacity: 0.9, opacity: 1 };
+                    
+                    let isFoundNeighbor = false;
+                    for (let code in currentNeighbors) {
+                        if (currentNeighbors[code].found && (featureCode === code || featureNameEn === currentNeighbors[code].name.en)) {
+                            isFoundNeighbor = true; break;
+                        }
+                    }
+
+                    if (isFoundNeighbor) return { fillColor: '#10b981', color: '#ffffff', weight: 2, fillOpacity: 0.9, opacity: 1 };
+                    if (currentMode === 'easy') return { fillColor: '#f8fafc', color: '#cbd5e1', weight: 1, fillOpacity: 1, opacity: 1 };
+                    return { fillColor: 'transparent', color: 'transparent', weight: 0, fillOpacity: 0, opacity: 0 };
+                }
+            }).addTo(map);
+        }
+
+        elements.input.addEventListener('input', function() {
+            let val = this.value;
+            elements.autocompleteList.innerHTML = '';
+            currentFocus = -1;
+            if (!val) return;
+
+            const allNames = Object.values(globalCountriesDict).map(c => c.name[currentLang]);
+            const uniqueNames = [...new Set(allNames)].sort();
+
+            uniqueNames.forEach(name => {
+                if (name.toLowerCase().startsWith(val.toLowerCase())) {
+                    let div = document.createElement('div');
+                    div.innerHTML = "<strong>" + name.substr(0, val.length) + "</strong>" + name.substr(val.length);
+                    div.addEventListener('click', function() {
+                        elements.input.value = name;
+                        elements.autocompleteList.innerHTML = '';
+                        checkInput(); 
+                    });
+                    elements.autocompleteList.appendChild(div);
+                }
+            });
+        });
+
+        elements.input.addEventListener('keydown', function(e) {
+            let x = document.getElementById("autocomplete-list");
+            if (x) x = x.getElementsByTagName("div");
+            
+            if (e.key === "ArrowDown") {
+                currentFocus++; addActive(x);
+            } else if (e.key === "ArrowUp") {
+                currentFocus--; addActive(x);
+            } else if (e.key === "Enter") {
+                e.preventDefault();
+                if (currentFocus > -1) { if (x) x[currentFocus].click(); } 
+                else { checkInput(); }
+            }
+        });
+
+        function addActive(x) {
+            if (!x) return false;
+            removeActive(x);
+            if (currentFocus >= x.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = (x.length - 1);
+            x[currentFocus].classList.add("autocomplete-active");
+            x[currentFocus].scrollIntoView({block: 'nearest'});
+        }
+
+        function removeActive(x) {
+            for (let i = 0; i < x.length; i++) x[i].classList.remove("autocomplete-active");
+        }
+
+        document.addEventListener('click', function (e) {
+            if (e.target !== elements.input) elements.autocompleteList.innerHTML = '';
+        });
+
+        function getEditDistance(a, b) {
+            if (!a || !b) return Math.max(a ? a.length : 0, b ? b.length : 0);
+            const matrix = Array.from({ length: a.length + 1 }, () => []);
+            for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+            for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+            for (let i = 1; i <= a.length; i++) {
+                for (let j = 1; j <= b.length; j++) {
+                    const cost = a[i - 1].toLowerCase() === b[j - 1].toLowerCase() ? 0 : 1;
+                    matrix[i][j] = Math.min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);
+                }
+            }
+            return matrix[a.length][b.length];
+        }
+
+        function triggerFireworks() {
+            const duration = 3 * 1000; const end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#3b82f6', '#10b981', '#f59e0b'] });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#3b82f6', '#10b981', '#f59e0b'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+
+        function showEndGameStats() {
+            const totalAttempts = totalNeighbors + wrongGuesses;
+            const accuracy = totalAttempts === 0 ? 100 : Math.round((totalNeighbors / totalAttempts) * 100);
+            
+            document.getElementById('text-accuracy').innerHTML = `${i18n[currentLang].textAccuracy} <span id="stat-accuracy">${accuracy}</span>%`;
+            document.getElementById('text-hints').innerHTML = `${i18n[currentLang].textHints} <span id="stat-hints">${hintsUsed}</span>`;
+            
+            setTimeout(() => { elements.modal.style.display = 'flex'; }, 1500);
+        }
+
+        function checkInput() {
+            if (audioCtx.state === 'suspended') audioCtx.resume(); 
+            const val = elements.input.value.trim();
+            if (val.length < 2) return;
+
+            elements.autocompleteList.innerHTML = ''; 
+            let isMatchFound = false;
+
+            for (let code in currentNeighbors) {
+                const nameHe = currentNeighbors[code].name.he;
+                const nameEn = currentNeighbors[code].name.en;
+                const nameAr = currentNeighbors[code].name.ar;
+
+                const allowedHe = nameHe.length >= 4 ? 2 : 1;
+                const allowedEn = nameEn.length >= 4 ? 2 : 1;
+                const allowedAr = nameAr.length >= 4 ? 2 : 1;
+                
+                const isMatch = (getEditDistance(val, nameHe) <= allowedHe) || 
+                                (getEditDistance(val, nameEn) <= allowedEn) || 
+                                (getEditDistance(val, nameAr) <= allowedAr);
+
+                if (!currentNeighbors[code].found && isMatch) {
+                    isMatchFound = true;
+                    currentNeighbors[code].found = true;
+                    foundCount++;
+                    elements.foundCount.textContent = foundCount;
+                    elements.progressBar.style.width = ((foundCount / totalNeighbors) * 100) + "%";
+                    
+                    if (currentHintCode === code) { currentHintCode = null; revealedIndices = []; }
+                    
+                    renderMap();
+                    
+                    if (foundCount === totalNeighbors) {
+                        playSound('win');
+                        elements.message.style.color = '#f59e0b';
+                        elements.message.textContent = i18n[currentLang].win;
+                        elements.input.disabled = true; elements.submitBtn.disabled = true; elements.hintBtn.disabled = true;
+                        triggerFireworks();
+                        showEndGameStats();
+                    } else {
+                        playSound('ding');
+                        elements.message.style.color = '#10b981';
+                        elements.message.textContent = i18n[currentLang].success;
+                        setTimeout(() => { if(elements.message.textContent === i18n[currentLang].success) elements.message.textContent = ''; }, 1500);
+                    }
+                    break;
+                }
+            }
+            
+            if (!isMatchFound) {
+                wrongGuesses++;
+                elements.message.style.color = '#ef4444'; 
+                elements.message.textContent = i18n[currentLang].wrongGuess;
+                setTimeout(() => { if(elements.message.textContent === i18n[currentLang].wrongGuess) elements.message.textContent = ''; }, 1500);
+            }
+            
+            elements.input.value = '';
+            elements.input.focus();
+        }
+
+        elements.hintBtn.addEventListener('click', () => {
+            hintsUsed++;
+            const unfoundCodes = Object.keys(currentNeighbors).filter(code => !currentNeighbors[code].found);
+            if (unfoundCodes.length === 0) return;
+
+            if (!currentHintCode || currentNeighbors[currentHintCode].found) {
+                currentHintCode = unfoundCodes[Math.floor(Math.random() * unfoundCodes.length)];
+                revealedIndices = [0]; 
+            } else {
+                const targetName = currentNeighbors[currentHintCode].name[currentLang];
+                let unrevealed = [];
+                for(let i=0; i<targetName.length; i++) {
+                    if (!revealedIndices.includes(i) && targetName[i] !== ' ') {
+                        unrevealed.push(i);
+                    }
+                }
+                if (unrevealed.length > 0) {
+                    const randIndex = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+                    revealedIndices.push(randIndex);
+                }
+            }
+
+            const targetName = currentNeighbors[currentHintCode].name[currentLang];
+            let displayStr = "";
+            
+            for(let i=0; i<targetName.length; i++) {
+                if (targetName[i] === ' ') {
+                    displayStr += "  "; 
+                } else if (revealedIndices.includes(i)) {
+                    displayStr += targetName[i] + " ";
+                } else {
+                    displayStr += "_ ";
+                }
+            }
+
+            elements.message.style.color = '#f59e0b';
+            elements.message.textContent = `${i18n[currentLang].hintPrefix}${displayStr.trim()}`;
+            elements.input.focus();
+        });
+
+        elements.submitBtn.addEventListener('click', checkInput);
+        elements.newGameBtn.addEventListener('click', startRandomGame);
+        document.getElementById('modalNewGameBtn').addEventListener('click', startRandomGame);
+
+        document.querySelectorAll('input[name="mode"]').forEach(radio => {
+            radio.addEventListener('change', (e) => { currentMode = e.target.value; renderMap(); });
+        });
+    </script>
+</body>
+</html>
