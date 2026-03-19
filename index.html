@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <title>משחק שכנות: נחש את המדינות הגובלות 🌍</title>
-    <meta name="description" content="משחק גיאוגרפיה מאתגר וחינוכי. נחשו את כל המדינות הגובלות במדינות העולם או במדינות ארצות הברית. כולל רמזים, סטטיסטיקות ומפות אינטראקטיביות.">
-    <meta name="keywords" content="משחק גיאוגרפיה, מדינות גובלות, שכנות, לימוד גיאוגרפיה, טריוויה מדינות, מפת העולם, ארצות הברית">
+    <title>משחק שכנות: נחש את המדינות הגובלות 🌍</title> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
     
     <style>
@@ -253,6 +252,27 @@
             "AL": { en: "Alabama", he: "אלבמה", ar: "ألاباما", borders: ["FL", "GA", "MS", "TN"] }, "AK": { en: "Alaska", he: "אלסקה", ar: "ألاسكا", borders: [] }, "AZ": { en: "Arizona", he: "אריזונה", ar: "أريزونا", borders: ["CA", "CO", "NM", "NV", "UT"] }, "AR": { en: "Arkansas", he: "ארקנסו", ar: "أركنساس", borders: ["LA", "MO", "MS", "OK", "TN", "TX"] }, "CA": { en: "California", he: "קליפורניה", ar: "كاليفورنيا", borders: ["AZ", "NV", "OR"] }, "CO": { en: "Colorado", he: "קולורדו", ar: "كولورادو", borders: ["AZ", "KS", "NE", "NM", "OK", "UT", "WY"] }, "CT": { en: "Connecticut", he: "קונטיקט", ar: "كونيتيكت", borders: ["MA", "NY", "RI"] }, "DE": { en: "Delaware", he: "דלאוור", ar: "ديلاوير", borders: ["MD", "NJ", "PA"] }, "FL": { en: "Florida", he: "פלורידה", ar: "فلوريدا", borders: ["AL", "GA"] }, "GA": { en: "Georgia", he: "ג'ורג'יה", ar: "جورجيا", borders: ["AL", "FL", "NC", "SC", "TN"] }, "HI": { en: "Hawaii", he: "הוואי", ar: "هاواي", borders: [] }, "ID": { en: "Idaho", he: "איידהו", ar: "أيداهو", borders: ["MT", "NV", "OR", "UT", "WA", "WY"] }, "IL": { en: "Illinois", he: "אילינוי", ar: "إلينوي", borders: ["IN", "IA", "KY", "MO", "WI"] }, "IN": { en: "Indiana", he: "אינדיאנה", ar: "إنديانا", borders: ["IL", "KY", "MI", "OH"] }, "IA": { en: "Iowa", he: "איווה", ar: "آيوا", borders: ["IL", "MN", "MO", "NE", "SD", "WI"] }, "KS": { en: "Kansas", he: "קנזס", ar: "كانساس", borders: ["CO", "MO", "NE", "OK"] }, "KY": { en: "Kentucky", he: "קנטקי", ar: "كنتاكي", borders: ["IL", "IN", "MO", "OH", "TN", "VA", "WV"] }, "LA": { en: "Louisiana", he: "לואיזיאנה", ar: "لويزيانا", borders: ["AR", "MS", "TX"] }, "ME": { en: "Maine", he: "מיין", ar: "مين", borders: ["NH"] }, "MD": { en: "Maryland", he: "מרילנד", ar: "ماريلاند", borders: ["DE", "PA", "VA", "WV"] }, "MA": { en: "Massachusetts", he: "מסצ'וסטס", ar: "ماساتشوستس", borders: ["CT", "NH", "NY", "RI", "VT"] }, "MI": { en: "Michigan", he: "מישיגן", ar: "ميشيغان", borders: ["IN", "OH", "WI"] }, "MN": { en: "Minnesota", he: "מינסוטה", ar: "مينيسوتا", borders: ["IA", "ND", "SD", "WI"] }, "MS": { en: "Mississippi", he: "מיסיסיפי", ar: "مسيسيبي", borders: ["AL", "AR", "LA", "TN"] }, "MO": { en: "Missouri", he: "מיזורי", ar: "ميزوري", borders: ["AR", "IL", "IA", "KS", "KY", "NE", "OK", "TN"] }, "MT": { en: "Montana", he: "מונטנה", ar: "مونتانا", borders: ["ID", "ND", "SD", "WY"] }, "NE": { en: "Nebraska", he: "נברסקה", ar: "نبراسكا", borders: ["CO", "IA", "KS", "MO", "SD", "WY"] }, "NV": { en: "Nevada", he: "נבדה", ar: "نيفادا", borders: ["AZ", "CA", "ID", "OR", "UT"] }, "NH": { en: "New Hampshire", he: "ניו המפשייר", ar: "نيوهامبشير", borders: ["ME", "MA", "VT"] }, "NJ": { en: "New Jersey", he: "ניו ג'רזי", ar: "نيوجيرسي", borders: ["DE", "NY", "PA"] }, "NM": { en: "New Mexico", he: "ניו מקסיקו", ar: "نيومكسيكو", borders: ["AZ", "CO", "OK", "TX", "UT"] }, "NY": { en: "New York", he: "ניו יורק", ar: "نيويورك", borders: ["CT", "MA", "NJ", "PA", "VT"] }, "NC": { en: "North Carolina", he: "צפון קרוליינה", ar: "كارولاينا الشمالية", borders: ["GA", "SC", "TN", "VA"] }, "ND": { en: "North Dakota", he: "צפון דקוטה", ar: "داكوتا الشمالية", borders: ["MN", "MT", "SD"] }, "OH": { en: "Ohio", he: "אוהיו", ar: "أوهايو", borders: ["IN", "KY", "MI", "PA", "WV"] }, "OK": { en: "Oklahoma", he: "אוקלהומה", ar: "أوكلاهوما", borders: ["AR", "CO", "KS", "MO", "NM", "TX"] }, "OR": { en: "Oregon", he: "אורגון", ar: "أوريغون", borders: ["CA", "ID", "NV", "WA"] }, "PA": { en: "Pennsylvania", he: "פנסילבניה", ar: "بنسيلفانيا", borders: ["DE", "MD", "NJ", "NY", "OH", "WV"] }, "RI": { en: "Rhode Island", he: "רוד איילנד", ar: "رود آيلاند", borders: ["CT", "MA"] }, "SC": { en: "South Carolina", he: "דרום קרוליינה", ar: "كارولاينا الجنوبية", borders: ["GA", "NC"] }, "SD": { en: "South Dakota", he: "דרום דקוטה", ar: "داكوتا الجنوبية", borders: ["IA", "MN", "MT", "NE", "ND", "WY"] }, "TN": { en: "Tennessee", he: "טנסי", ar: "تينيسي", borders: ["AL", "AR", "GA", "KY", "MS", "MO", "NC", "VA"] }, "TX": { en: "Texas", he: "טקסס", ar: "تكساس", borders: ["AR", "LA", "NM", "OK"] }, "UT": { en: "Utah", he: "יוטה", ar: "يوتا", borders: ["AZ", "CO", "ID", "NV", "NM", "WY"] }, "VT": { en: "Vermont", he: "ורמונט", ar: "فيرمونت", borders: ["MA", "NH", "NY"] }, "VA": { en: "Virginia", he: "וירג'יניה", ar: "فرجينيا", borders: ["KY", "MD", "NC", "TN", "WV"] }, "WA": { en: "Washington", he: "וושינגטון", ar: "واشنطن", borders: ["ID", "OR"] }, "WV": { en: "West Virginia", he: "מערב וירג'יניה", ar: "فيرجينيا الغربية", borders: ["KY", "MD", "OH", "PA", "VA"] }, "WI": { en: "Wisconsin", he: "ויסקונסין", ar: "ويسكونسن", borders: ["IL", "IA", "MI", "MN"] }, "WY": { en: "Wyoming", he: "ויומינג", ar: "وايومنغ", borders: ["CO", "ID", "MT", "NE", "SD", "UT"] }
         };
 
+        // מילון חילוץ: מזהה שמות בעייתיים במפה ומכריח אותם לקבל קוד תקין
+        const geoNameFixes = {
+            'united republic of tanzania': 'TZA', 'tanzania': 'TZA',
+            'democratic republic of the congo': 'COD', 'dr congo': 'COD',
+            'republic of the congo': 'COG', 'republic of congo': 'COG',
+            'ivory coast': 'CIV', 'côte d\'ivoire': 'CIV',
+            'france': 'FRA', 'norway': 'NOR',
+            'united states of america': 'USA', 'united states': 'USA',
+            'swaziland': 'SWZ', 'eswatini': 'SWZ',
+            'macedonia': 'MKD', 'north macedonia': 'MKD',
+            'czech republic': 'CZE', 'czechia': 'CZE',
+            'the bahamas': 'BHS', 'bahamas': 'BHS',
+            'the gambia': 'GMB', 'gambia': 'GMB',
+            'federated states of micronesia': 'FSM', 'micronesia': 'FSM',
+            'fiji': 'FJI', 'serbia': 'SRB', 'republic of serbia': 'SRB',
+            'kosovo': 'SRB', 'somaliland': 'SOM', 'western sahara': 'MAR',
+            'palestine': 'ISR', 'west bank': 'ISR', 'gaza': 'ISR',
+            'northern cyprus': 'CYP', 'romania': 'ROU',
+            'east timor': 'TLS', 'timor-leste': 'TLS'
+        };
+
         document.addEventListener("DOMContentLoaded", async function() {
             try {
                 const [apiResponse, geoResponse, usGeoResponse] = await Promise.all([
@@ -266,24 +286,25 @@
                 worldGeo = await geoResponse.json();
                 usGeo = await usGeoResponse.json();
 
+                // --- בניית מפת עולם עם תיקוני חילוץ ---
                 worldGeo.features.forEach(feature => {
                     let fCode = feature.properties.ISO_A3 || feature.properties.iso_a3 || feature.properties.ADM0_A3 || feature.id;
                     let fName = (feature.properties.ADMIN || feature.properties.name || "").toLowerCase();
                     
-                    if (fCode === 'PSE' || fCode === 'WBG' || fCode === 'GAZ' || fName.includes('palestine') || fName.includes('west bank') || fName.includes('gaza')) {
-                        feature.properties.fixedCode = 'ISR'; feature.id = 'ISR';
+                    if (geoNameFixes[fName]) {
+                        feature.properties.fixedCode = geoNameFixes[fName];
+                    } else if (fCode === 'PSE' || fCode === 'WBG' || fCode === 'GAZ' || fName.includes('palestine') || fName.includes('west bank') || fName.includes('gaza')) {
+                        feature.properties.fixedCode = 'ISR';
                     } else if (fCode === 'ESH' || fName.includes('western sahara')) {
-                        feature.properties.fixedCode = 'MAR'; feature.id = 'MAR';
-                    } else if (fCode === 'XKX' || fCode === 'KOS' || fCode === 'UNK' || fName.includes('kosovo') || fName === 'serbia' || fName.includes('republic of serbia')) {
-                        feature.properties.fixedCode = 'SRB'; feature.id = 'SRB';
+                        feature.properties.fixedCode = 'MAR';
+                    } else if (fCode === 'XKX' || fCode === 'KOS' || fCode === 'UNK' || fName.includes('kosovo') || fName.includes('serbia')) {
+                        feature.properties.fixedCode = 'SRB';
                     } else if (fCode === 'SOL' || fName.includes('somaliland')) {
-                        feature.properties.fixedCode = 'SOM'; feature.id = 'SOM';
+                        feature.properties.fixedCode = 'SOM';
                     } else if (fCode === 'CYN' || fName.includes('northern cyprus')) {
-                        feature.properties.fixedCode = 'CYP'; feature.id = 'CYP';
-                    } else if (fCode === 'USA' || fCode === 'US1' || fName.includes('united states') || fName.includes('united states of america')) {
-                        feature.properties.fixedCode = 'USA'; feature.id = 'USA';
+                        feature.properties.fixedCode = 'CYP';
                     } else {
-                        feature.properties.fixedCode = fCode;
+                        feature.properties.fixedCode = fCode === '-99' ? '' : fCode;
                     }
                     feature.properties.fixedName = fName;
                 });
@@ -317,6 +338,7 @@
                     });
                 });
 
+                // --- בניית מפת ארה"ב ---
                 usGeo.features.forEach(f => {
                     let props = f.properties;
                     let fNameEn = (props.name || "").toLowerCase();
